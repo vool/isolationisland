@@ -1,0 +1,48 @@
+<?php
+/* 
+ * Config File
+ * 
+ */
+
+ /*------------- database --------------------*/
+define("db_passwd", "");
+define("db_user", "");
+define("db_name", "");
+define("db_host", "");
+define("DEBUG", FALSE);
+define("LOG", true);
+
+ /*------------- stuffs --------------------*/
+
+if (DEBUG) {
+	error_reporting(E_ALL);
+	ini_set("display_errors", 1);
+}
+
+define("email", "");
+define("email_from", "");
+
+
+/*--------------- global func / setting ----------*/
+/*---------------- aka stufff that not worth hitting the db for --------------*/
+
+/* misc */
+
+//TODO needs changing
+$metaImage = "img/shrine.png";
+$title = "Street Pew";
+$metaTitle = "Street Pew - Ireland's roadside shrines and grottos as captured by Google Street View";
+$metaDesc = "A crowdsourced interactive map of Ireland's roadside shrines and grottos as captured by Google Street View. ";
+$url = "http://streetpew.vool.ie/";
+$url = $_SERVER['HTTP_HOST'];
+
+
+//API keys
+$keys = [
+    'google' => [
+        'maps' => ''
+        ]
+    ];
+
+
+?>

@@ -1,0 +1,22 @@
+{
+  "name": "site",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.5.0",
+    "leaflet": "^1.6.0",
+    "leaflet-maskcanvas": "^1.0.0",
+    "leaflet-sidebar-v2": "^3.2.2",
+    "leaflet.featuregroup.subgroup": "^1.0.2",
+    "leaflet.markercluster": "^1.4.1",
+    "micromodal": "^0.4.6"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
