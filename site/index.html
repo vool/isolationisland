@@ -1,0 +1,146 @@
+     <!--                        ___                                ___           ___           ___           ___
+     /\__\                       /\  \                              /\  \         /\  \         /\  \         /\__\
+    /:/ _/_         ___         /::\  \         ___                 \:\  \       /::\  \       |::\  \       /:/ _/_
+   /:/ /\  \       /\__\       /:/\:\  \       /|  |                 \:\  \     /:/\:\  \      |:|:\  \     /:/ /\__\
+  /:/ /::\  \     /:/  /      /:/ /::\  \     |:|  |             ___ /::\  \   /:/  \:\  \   __|:|\:\  \   /:/ /:/ _/_
+ /:/_/:/\:\__\   /:/__/      /:/_/:/\:\__\    |:|  |            /\  /:/\:\__\ /:/__/ \:\__\ /::::|_\:\__\ /:/_/:/ /\__\
+ \:\/:/ /:/  /  /::\  \      \:\/:/  \/__/  __|:|__|            \:\/:/  \/__/ \:\  \ /:/  / \:\~~\  \/__/ \:\/:/ /:/  /
+  \::/ /:/  /  /:/\:\  \      \::/__/      /::::\  \             \::/__/       \:\  /:/  /   \:\  \        \::/_/:/  /
+   \/_/:/  /   \/__\:\  \      \:\  \      ~~~~\:\  \             \:\  \        \:\/:/  /     \:\  \        \:\/:/  /
+     /:/  /         \:\__\      \:\__\          \:\__\             \:\__\        \::/  /       \:\__\        \::/  /
+     \/__/           \/__/       \/__/           \/__/              \/__/         \/__/         \/__/         \/-->
+
+<!DOCTYPE html>
+<html lang="en-UK">
+
+<head>
+	<meta charset="utf-8">
+	<title>Isolation Island</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Generate you own personal COVID-19 2km Isolation Island and discover some interesting locations with the help of Open Data">
+	<meta name="author" content="Keith Phelan">
+
+	<!--Tweet'in -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:site" content="@TweetPhelan">
+	<meta name="twitter:creator" content="@TweetPhelan">
+	<meta name="twitter:title" content="Isolation Island">
+	<meta name="twitter:description" content="Generate you own personal COVID-19 2km Isolation Island and discover some interesting locations with the help of Open Data">
+	<meta name="twitter:image" content="https://isolationisland.vool.ie/img/card.png">
+
+	<!-- facebook'in -->
+	<meta property="og:title" content="Isolation Island" />
+	<meta property="og:description" content="Generate you own personal COVID-19 2km Isolation Island and discover some interesting locations with the help of Open Data " />
+	<meta property="og:image" content="https://isolationisland.vool.ie/img/card.png" />
+	<meta property="og:url" content="https://isolationisland.vool.ie" />
+	<meta property="og:locale" content="en_GB" />
+
+	<script src="https://code.jquery.com/jquery-1.8.0.min.js"></script>
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-19051681-8"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-19051681-8');
+	</script>
+
+	<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
+	<link type="text/css" rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.css" />
+	<link type="text/css" rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+	<link rel="stylesheet" href="node_modules/leaflet-sidebar-v2/css/leaflet-sidebar.css" />
+	<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+	<link rel="stylesheet" href="main.css" />
+</head>
+
+<body>
+	<div id="map"></div>
+	<div id="sidebar" class="leaflet-sidebar collapsed">
+
+		<!-- Nav tabs -->
+		<div class="leaflet-sidebar-tabs">
+			<ul role="tablist">
+				<!-- top aligned tabs -->
+				<li><a href="#home" role="tab"><i class="fa fa-info"></i></a></li>
+				<li><a href="#profile" role="tab"><i class="fa fa-map-marker"></i></a></li>
+			</ul>
+
+			<ul role="tablist">
+				<!-- bottom aligned tabs -->
+				<!-- <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li> -->
+			</ul>
+		</div>
+
+		<!-- Tab panes -->
+		<div class="leaflet-sidebar-content">
+			<div class="leaflet-sidebar-pane" id="home">
+				<h1 class="leaflet-sidebar-header">
+					Isolation Island
+					<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
+				</h1>
+				<p class="about">
+					Due to the COVID-19 pandemenic the Irish govenment introduced restrictions on unnessary travel which meant that you could only exercise within 2 kilometres of your home.
+					<br>
+					This website will generate you own personal 2 kilometre Isolation Island and with the help of <i>Open Data</i> will help you discover some interesting locations within these limits.
+					<br><br>
+					Created by <a href="https://twitter.com/tweetphelan" target="_blank">Keith Phelan</a> with data from <a href="https://www.archaeology.ie/" target="_blank">National Monuments Service</a> and
+					<a href="https://www.buildingsofireland.ie/" target="_blank">National Inventory of Architectural Heritage</a>
+
+					<br><br>
+
+				</p>
+
+				<h2>Share your map:</h2>
+
+				<p class="share">
+
+					<i class="fa fa-twitter fa-3x" id="tw_share"></i>
+
+				</p>
+
+
+			</div>
+
+			<div class="leaflet-sidebar-pane" id="profile">
+				<h1 class="leaflet-sidebar-header"><span id="title"></span>
+					<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
+				</h1>
+				<div id="details">Select a marker to view details.</div>
+
+			</div>
+		</div>
+	</div>
+
+	<div class="modal micromodal-slide" id="location-modal" aria-hidden="true">
+		<div class="modal__overlay" tabindex="-1" data-micromodal-close>
+			<div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
+				<header class="modal__header">
+					<h2 class="modal__title" id="modal-1-title">
+						Let's find your location...
+					</h2>
+					<button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
+				</header>
+				<main class="modal__content" id="modal-1-content">
+					<p>
+						In order to generate you own personal <i>Isolation Island</i> I need to your location (don't worry this is not saved or shared).
+					</p>
+					<p id="geo-status"></p>
+				</main>
+				<footer class="modal__footer">
+					<button class="modal__btn modal__btn-primary" id="geoFind">Find Location</button>
+					<button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
+				</footer>
+			</div>
+		</div>
+	</div>
+	<script src="node_modules/leaflet/dist/leaflet.js"></script>
+	<script src="node_modules/leaflet-maskcanvas/src/QuadTree.js"></script>
+	<script src="node_modules/leaflet-maskcanvas/src/L.GridLayer.MaskCanvas.js"></script>
+	<script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+	<script src="node_modules/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
+	<script src="node_modules/leaflet.featuregroup.subgroup/dist/leaflet.featuregroup.subgroup.js"></script>
+	<script src="node_modules/micromodal/dist/micromodal.min.js"></script>
+	<script src="app.js"></script>
+</body>
+
+</html>
