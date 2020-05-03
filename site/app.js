@@ -8,13 +8,11 @@ ____/|__/  \__,_/  /____/  /_/ /_/        _\__, /  \____/ \__,_/  /_/           
 
 
 var app = (function() {
-  // Let's make sure no one can directly access our songList
-  //var songList = ['California Girls', 'California Dreaming', 'Hotel California'];
 
   // map el
   var map, sites, sidebar, overlayMaps, loc, layerControl;
 
-  var rad = 2000;
+  var rad = 5000;
 
   var gkey = 'AIzaSyAlaaeJwtndDUhIlIk736P_Hku5NBdCquc';
   var gdbkey = '6db070f0-7c27-11ea-8264-e974339fc182';
@@ -52,7 +50,7 @@ var app = (function() {
       //center: new L.LatLng(lat, lng),
       center: loc,
       //center: loc,
-      zoom: 14,
+      zoom: 13,
       layers: [osm]
     });
 
@@ -877,7 +875,7 @@ $(document).ready(function() {
 
   // move
   $("#tw_share").click(function() {
-    window.open("https://twitter.com/share?url="+ encodeURIComponent(window.location.href)+"&text=Check out my Isolation Island map %23COVID19Ireland %232kmfromhome&related=tweetphelan", '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;
+    window.open("https://twitter.com/share?url="+ encodeURIComponent(window.location.href)+"&text=Check out my Isolation Island map %23COVID19Ireland %235kmfromhome&related=tweetphelan", '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;
   });
 
 
