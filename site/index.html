@@ -1,4 +1,4 @@
-     <!--                        ___                                ___           ___           ___           ___
+<!--                        ___                                ___           ___           ___           ___
      /\__\                       /\  \                              /\  \         /\  \         /\  \         /\__\
     /:/ _/_         ___         /::\  \         ___                 \:\  \       /::\  \       |::\  \       /:/ _/_
    /:/ /\  \       /\__\       /:/\:\  \       /|  |                 \:\  \     /:/\:\  \      |:|:\  \     /:/ /\__\
@@ -11,13 +11,13 @@
      \/__/           \/__/       \/__/           \/__/              \/__/         \/__/         \/__/         \/-->
 
 <!DOCTYPE html>
-<html lang="en-UK">
+<html lang="en">
 
 <head>
 	<meta charset="utf-8">
 	<title>Isolation Island</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="Generate you own personal COVID-19 5km Isolation Island and discover some interesting locations with the help of Open Data">
+	<meta name="description" content="Generate you own personal COVID-19 2km Isolation Island and discover some interesting locations with the help of Open Data">
 	<meta name="author" content="Keith Phelan">
 
 	<!--Tweet'in -->
@@ -25,17 +25,16 @@
 	<meta name="twitter:site" content="@TweetPhelan">
 	<meta name="twitter:creator" content="@TweetPhelan">
 	<meta name="twitter:title" content="Isolation Island">
-	<meta name="twitter:description" content="Generate you own personal COVID-19 5km Isolation Island and discover some interesting locations with the help of Open Data">
+	<meta name="twitter:description" content="Generate you own personal COVID-19 2km Isolation Island and discover some interesting locations with the help of Open Data">
 	<meta name="twitter:image" content="https://isolationisland.vool.ie/img/card.png">
 
 	<!-- facebook'in -->
 	<meta property="og:title" content="Isolation Island" />
-	<meta property="og:description" content="Generate you own personal COVID-19 5km Isolation Island and discover some interesting locations with the help of Open Data " />
+	<meta property="og:description" content="Generate you own personal COVID-19 2km Isolation Island and discover some interesting locations with the help of Open Data " />
 	<meta property="og:image" content="https://isolationisland.vool.ie/img/card.png" />
 	<meta property="og:url" content="https://isolationisland.vool.ie" />
 	<meta property="og:locale" content="en_GB" />
 
-	<script src="https://code.jquery.com/jquery-1.8.0.min.js"></script>
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-19051681-8"></script>
 	<script>
 		window.dataLayer = window.dataLayer || [];
@@ -43,6 +42,7 @@
 	  gtag('js', new Date());
 
 	  gtag('config', 'UA-19051681-8');
+
 	</script>
 
 	<link rel="stylesheet" href="node_modules/leaflet/dist/leaflet.css" />
@@ -50,88 +50,121 @@
 	<link type="text/css" rel="stylesheet" href="node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css" />
 	<link rel="stylesheet" href="node_modules/leaflet-sidebar-v2/css/leaflet-sidebar.css" />
 	<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
-	<link rel="stylesheet" href="main.css" />
+	<link rel="stylesheet" href="node_modules/sweetalert2/dist/sweetalert2.min.css">
+	<link rel="stylesheet" href="app.css" />
 </head>
 
 <body>
-	<div id="map"></div>
-	<div id="sidebar" class="leaflet-sidebar collapsed">
 
-		<!-- Nav tabs -->
-		<div class="leaflet-sidebar-tabs">
-			<ul role="tablist">
-				<!-- top aligned tabs -->
-				<li><a href="#home" role="tab"><i class="fa fa-info"></i></a></li>
-				<li><a href="#profile" role="tab"><i class="fa fa-map-marker"></i></a></li>
-			</ul>
+	<div x-data="stay_at_home()" x-init="wash_your_hands()">
 
-			<ul role="tablist">
-				<!-- bottom aligned tabs -->
-				<!-- <li><a href="#settings" role="tab"><i class="fa fa-gear"></i></a></li> -->
-			</ul>
-		</div>
+		<div id="map"></div>
+		<div id="sidebar" class="leaflet-sidebar collapsed">
 
-		<!-- Tab panes -->
-		<div class="leaflet-sidebar-content">
-			<div class="leaflet-sidebar-pane" id="home">
-				<h1 class="leaflet-sidebar-header">
-					Isolation Island
-					<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
-				</h1>
-				<p class="about">
-					Due to the COVID-19 pandemenic the Irish govenment introduced restrictions on unnessary travel which meant that you could only exercise within 5 kilometres of your home.
-					<br>
-					This website will generate you own personal 5 kilometre Isolation Island and with the help of <i>Open Data</i> will help you discover some interesting locations within these limits.
-					<br><br>
-					Created by <a href="https://twitter.com/tweetphelan" target="_blank">Keith Phelan</a> with data from <a href="https://www.archaeology.ie/" target="_blank">National Monuments Service</a> and
-					<a href="https://www.buildingsofireland.ie/" target="_blank">National Inventory of Architectural Heritage</a>
+			<!-- Nav tabs -->
+			<div class="leaflet-sidebar-tabs">
+				<ul role="tablist">
+					<li><a href="#home" role="tab"><i class="fa fa-info"></i></a></li>
+					<li><a href="#profile" role="tab"><i class="fa fa-map-marker"></i></a></li>
+				</ul>
 
-					<br><br>
-
-				</p>
-
-				<h2>Share your map:</h2>
-
-				<p class="share">
-
-					<i class="fa fa-twitter fa-3x" id="tw_share"></i>
-
-				</p>
-
-
+				<ul role="tablist">
+					<li><a href="#location" role="tab"><i class="fa fa-compass"></i></a></li>
+				</ul>
 			</div>
 
-			<div class="leaflet-sidebar-pane" id="profile">
-				<h1 class="leaflet-sidebar-header"><span id="title"></span>
-					<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
-				</h1>
-				<div id="details">Select a marker to view details.</div>
+			<!-- Tab panes -->
+			<div class="leaflet-sidebar-content">
+				<div class="leaflet-sidebar-pane" id="home">
+					<h1 class="leaflet-sidebar-header">
+						Isolation Island
+						<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
+					</h1>
+					<p class="about">
+						Due to the COVID-19 pandemic the Irish government introduced restrictions on unnecessary travel which meant that you could only exercise within <span x-text="radius/1000"></span> kilometres of your home.
+						<br>
+						This website will generate you own personal <span x-text="radius/1000"></span> kilometre Isolation Island and with the help of <i>Open Data</i> will help you discover some interesting locations within these limits.
+						<br><br>
+						Created by <a href="https://twitter.com/tweetphelan" target="_blank">Keith Phelan</a> with data from <a href="https://www.archaeology.ie/" target="_blank">National Monuments Service</a> and
+						<a href="https://www.buildingsofireland.ie/" target="_blank">National Inventory of Architectural Heritage</a>
 
-			</div>
-		</div>
-	</div>
+						<br><br>
 
-	<div class="modal micromodal-slide" id="location-modal" aria-hidden="true">
-		<div class="modal__overlay" tabindex="-1" data-micromodal-close>
-			<div class="modal__container" role="dialog" aria-modal="true" aria-labelledby="modal-1-title">
-				<header class="modal__header">
-					<h2 class="modal__title" id="modal-1-title">
-						Let's find your location...
-					</h2>
-					<button class="modal__close" aria-label="Close modal" data-micromodal-close></button>
-				</header>
-				<main class="modal__content" id="modal-1-content">
-					<p>
-						In order to generate you own personal <i>Isolation Island</i> I need to your location (don't worry this is not saved or shared).
+						This map shows <span x-show.transition="siteData['smr']"><span x-text="siteData['smr'] ? siteData['smr'].length  : 0"></span> locations from the <i>NMS Sites and Monuments Record</i>,
+							<span x-show.transition="siteData['niah']"><span x-text="siteData['niah'] ? siteData['niah'].length  : 0"></span> locations from the <i> National Inventory of Architectural Heritage</i>
+								and <span x-show.transition="siteData['wrecks']"><span x-text="siteData['wrecks'] ? siteData['wrecks'].length  : 0"></span> locations from the <i>NMS Wreck database</i> all located within <span x-text="radius/1000"></span> kilometres
+									of your
+									location.
+								</span>
+						<br><br>
+						For more information see <a href="http://www.vool.ie/isolation-island/" target="_blank">this post</a>.
+						<br><br>
 					</p>
-					<p id="geo-status"></p>
-				</main>
-				<footer class="modal__footer">
-					<button class="modal__btn modal__btn-primary" id="geoFind">Find Location</button>
-					<button class="modal__btn" data-micromodal-close aria-label="Close this dialog window">Close</button>
-				</footer>
+
+					<h2>Share your map:</h2>
+
+					<p class="share">
+						<i class="fa fa-twitter fa-3x" id="" @click="shareTwitter()"></i>
+					</p>
+
+				</div>
+
+				<div class="leaflet-sidebar-pane" id="profile">
+					<h1 class="leaflet-sidebar-header"><span x-text="poi.title"></span>
+						<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
+					</h1>
+					<div x-html="poi.details"></div>
+
+				</div>
+
+				<div class="leaflet-sidebar-pane" id="location">
+					<h1 class="leaflet-sidebar-header">Location</span>
+						<div class="leaflet-sidebar-close"><i class="fa fa-caret-right"></i></div>
+					</h1>
+					<p x-show="loc.lat">
+						Your location is set as <span x-text="parseFloat(loc.lat).toFixed(4)"></span>, <span x-text="parseFloat(loc.lng).toFixed(4)"></span> with a radius of <span x-text="radius/1000"></span>km.
+					</p>
+					<br>
+
+					<button class="px-4 bg-sinbad-700 p-3 rounded-lg text-white hover:bg-sinbad-300 hover:text-sinbad-800 w-full" @click="setLocGeoBtn();">Set your location by GPS</button>
+
+					<button class="px-4 mt-3 bg-sinbad-700 p-3 rounded-lg text-white hover:bg-sinbad-300 hover:text-sinbad-800 w-full" @click="setLocManualBtn();">Set your loaction manualy</button>
+
+				</div>
 			</div>
 		</div>
+
+		<!--Overlay-->
+		<div class="overflow-auto" style="background-color: rgba(0,0,0,0.5)" x-show="showLocationModal" :class="{ 'absolute inset-0 z-10 flex items-center justify-center': showLocationModal }">
+			<!--Dialog-->
+			<div class="bg-white w-11/12 md:max-w-md mx-auto rounded shadow-lg py-4 text-left px-6" x-show="showLocationModal" @click.away="showLocationModal = false" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-90"
+			  x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-300" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
+
+				<!--Title-->
+				<div class="flex justify-between items-center pb-3">
+					<p class="text-2xl font-bold text-sinbad-800">Let's find your location...</p>
+					<div class="cursor-pointer z-50" @click="showLocationModal = false">
+						<svg class="fill-current text-black" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
+							<path d="M14.53 4.53l-1.06-1.06L9 7.94 4.53 3.47 3.47 4.53 7.94 9l-4.47 4.47 1.06 1.06L9 10.06l4.47 4.47 1.06-1.06L10.06 9z"></path>
+						</svg>
+					</div>
+				</div>
+
+				<!-- content -->
+				<p>
+					In order to generate you own personal <i>Isolation Island</i> I need to your location (don't worry this is not saved or shared).
+				</p>
+				<p x-text="locationModalStatus"></p>
+
+				<!--Footer-->
+				<div class="flex justify-end pt-2">
+					<button class="modal-close px-4 bg-transparent p-3 bg-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 hover:text-gray-500 mr-2" @click="showLocationModal = false">Close</button>
+					<button class="px-4 bg-sinbad-700 p-3 rounded-lg text-white hover:bg-sinbad-300 hover:text-sinbad-800" @click="geoFindBtn();">Find Location</button>
+				</div>
+
+			</div>
+			<!--/Dialog -->
+		</div><!-- /Overlay -->
 	</div>
 	<script src="node_modules/leaflet/dist/leaflet.js"></script>
 	<script src="node_modules/leaflet-maskcanvas/src/QuadTree.js"></script>
@@ -139,7 +172,8 @@
 	<script src="node_modules/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 	<script src="node_modules/leaflet-sidebar-v2/js/leaflet-sidebar.min.js"></script>
 	<script src="node_modules/leaflet.featuregroup.subgroup/dist/leaflet.featuregroup.subgroup.js"></script>
-	<script src="node_modules/micromodal/dist/micromodal.min.js"></script>
+	<script src="node_modules/alpinejs/dist/alpine.js"></script>
+	<script src="node_modules/sweetalert2/dist/sweetalert2.min.js"></script>
 	<script src="app.js"></script>
 </body>
 

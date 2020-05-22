@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  background-color: theme('colors.sinbad.500');
+}
+
+#map {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
+.about {
+  font-size: 14px;
+}
+
+.about a {
+  background-color: theme('colors.sinbad.200');
+  color: theme('colors.sinbad.800');
+  text-decoration: none;
+  padding: 2px;
+}
+
+.about a:hover {
+  background-color: theme('colors.sinbad.500');
+  color: #fff;
+}
+
+h1, h2, h3, h4 {}
+
+.share .fa {
+  color: #5EA7A7;
+}
+
+/* show sidebar
+this.sidebar.show(); // no worky ?
+ css hack
+*/
+#sidebar {
+  display: none;
+}
+
+td {
+  vertical-align: top;
+}
+
+/*
+sidebar
+*/
+.leaflet-sidebar-header {
+  background-color: #5EA7A7;
+  margin-bottom: 0.5em;
+}
+
+.leaflet-sidebar-tabs>li.active, .leaflet-sidebar-tabs>ul>li.active {
+  color: #fff;
+  background-color: #5EA7A7;
+}
+
+#sidebar p {
+  font-size: 1.5em;
+}
+
+#sidebar h2 {
+  font-size: 2em;
+}

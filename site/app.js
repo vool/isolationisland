@@ -1,4 +1,4 @@
-                           /*____                                                ______                  _________
+/*____                                                ______                  _________
 ___      ________ ____________  /_        _____  ________ ____  __________       ___  /_ ______ ________ ______  /________
 __ | /| / /_  __ `/__  ___/__  __ \       __  / / /_  __ \_  / / /__  ___/       __  __ \_  __ `/__  __ \_  __  / __  ___/
 __ |/ |/ / / /_/ / _(__  ) _  / / /       _  /_/ / / /_/ // /_/ / _  /           _  / / // /_/ / _  / / // /_/ /  _(__  )
@@ -6,877 +6,749 @@ ____/|__/  \__,_/  /____/  /_/ /_/        _\__, /  \____/ \__,_/  /_/           
                                           /____*/
 
 
+function stay_at_home() {
 
-var app = (function() {
-
-  // map el
-  var map, sites, sidebar, overlayMaps, loc, layerControl;
-
-  var rad = 5000;
+  var sidebar, overlayMaps, layerControl;
 
   var gkey = 'AIzaSyAlaaeJwtndDUhIlIk736P_Hku5NBdCquc';
   var gdbkey = '6db070f0-7c27-11ea-8264-e974339fc182';
 
   var siteData = [];
   var icons = [];
-  var subGroup = [];
-  //var overlayMaps = [];
 
-
-
-  function initMap() {
-    console.log('init map');
-
-    //============
-    // Base Layers
-
-    var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
-	maxZoom: 19,
-	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">hotosm</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OSM Fr</a>'
-});
-
-    var coverageLayer = new L.GridLayer.MaskCanvas({
-      opacity: 1,
-      radius: rad,
-      useAbsoluteRadius: true,
-      color: '#90CCCB'
-    });
-
-    coverageLayer.setData([
-      [loc.lat, loc.lng],
-    ]);
-
-    map = new L.Map('map', {
-      //center: new L.LatLng(lat, lng),
-      center: loc,
-      //center: loc,
-      zoom: 13,
-      layers: [osm]
-    });
-
-    map.addLayer(coverageLayer);
-
-    // scale
-    L.control.scale({
-      'imperial': false
-    }).addTo(map);
-
-    // zoom control
-    // L.control
-    //   .zoom({
-    //     position: "topleft"
-    //   })
-    //   .addTo(map);
-
-    // market cluster group
-    sites = new L.MarkerClusterGroup({
-      spiderfyOnMaxZoom: true,
-      showCoverageOnHover: false,
-      zoomToBoundsOnClick: true
-    });
-
-
-
-    sidebar = L.control.sidebar({
-      container: "sidebar",
-      position: "right"
-    });
-    sidebar.addTo(map);
-
-    //sidebar.hide();
-    // subGroup['smr'] = L.featureGroup.subGroup(sites);
-    // //L.featureGroup();
-    // subGroup['niah'] = L.featureGroup.subGroup(sites);
-    // //L.featureGroup();
-    //
-    // subGroup['wrecks'] = L.featureGroup.subGroup(sites);
-    // subGroup['smr'].addTo(map);
-    // subGroup['niah'].addTo(map);
-    // subGroup['wrecks'].addTo(map);
-
-    // overlayMaps = {
-    //   //"NMS Sites and Monuments Record": subGroup['smr'],
-    //   //"National Inventory of Architectural Heritage": subGroup['niah'],
-    // //  "NMS Wreck database ": subGroup['wrecks']
-    // };
-    //
-    // L.control.layers(null, overlayMaps, {
-    //   collapsed: false
-    // }).addTo(map);
-
-    layerControl = L.control.layers(null, null, {
-      collapsed: false
-    }).addTo(map);
-
-    //
-    // L.control
-    //   .zoom({
-    //     position: "topright"
-    //   })
-    //   .addTo(map);
-
-
-    // set icons
-
-    icons['smr'] = new L.Icon({
-      iconUrl: '/img/leaflet/marker-icon-green.png',
-      shadowUrl: '/img/leaflet/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-
-    icons['niah'] = new L.Icon({
-      iconUrl: '/img/leaflet/marker-icon-red.png',
-      shadowUrl: '/img/leaflet/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-
-    icons['wreck'] = new L.Icon({
-      iconUrl: '/img/leaflet/marker-icon-yellow.png',
-      shadowUrl: '/img/leaflet/marker-shadow.png',
-      iconSize: [25, 41],
-      iconAnchor: [12, 41],
-      popupAnchor: [1, -34],
-      shadowSize: [41, 41]
-    });
-
-
-    // add site layer to map
-    map.addLayer(sites);
-
-    // show sidebar
-    //sidebar.show(); // why no worky ?
-    // css hack
-    document.getElementById("sidebar").style.display = "block";
-
-
-    loadData();
-
-
-  }
-
-
-  function getLoc() {
-    //return loc;
-    return loc;
-  }
-
-  function loadData() {
-
-
-    $.getJSON("getSites.php?lat=" + loc.lat + "&lng=" + loc.lng + "&table=smr&radius=" + rad, function(data) {
-
-      subGroup['smr'] = L.featureGroup.subGroup(sites);
-
-
-
-
-      siteData['smr'] = data;
-
-      for (var i = 0; i < data.length; i++) {
-
-        var name = data[i].CLASSDESC;
-
-        var location = new L.LatLng(data[i].lat, data[i].lng);
-
-        var id = data[i].index;
-        var lat = data[i].Lat;
-        var lng = data[i].lng;
-
-        var marker = new L.Marker(location, {
-          title: name,
-          // id : id,
-          lat: lat,
-          lng: lng,
-          icon: icons['smr'],
-          type: 'smr',
-          index: i
-        });
-
-        //       var details = `
-        //
-        //
-        //               <h2 class="color-brown mb-3">${name}</h2>
-        //
-        //                     <img src="${data[i].IMAGE_LINK}"/>
-        //                               <div class="row">
-        //                   <div class="col-5"><p>Reg No</p></div>
-        //                   <div class="col-7"><p><strong>21003042</strong></p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //                               <div class="row">
-        //                   <div class="col-5"><p>Rating</p></div>
-        //                   <div class="col-7"><p><strong>Regional</strong></p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //                               <div class="row">
-        //                   <div class="col-5"><p>Categories of Special Interest</p></div>
-        //                   <div class="col-7"><p><strong>Architectural</strong></p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //
-        //                               <div class="row">
-        //                   <div class="col-5"><p>Original Use</p></div>
-        //                   <div class="col-7"><p>Store/warehouse</p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //
-        //                               <div class="row">
-        //                   <div class="col-5"><p>In Use As</p></div>
-        //                   <div class="col-7"><p>Laundry</p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //                             <div class="row">
-        //                   <div class="col-5"><p>Date</p></div>
-        //                   <div class="col-7"><p>1875 - 1880</p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //                               <div class="row">
-        //                   <div class="col-5"><p>Date Recorded</p></div>
-        //                   <div class="col-7"><p>19/09/2005</p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        //                               <div class="row">
-        //                   <div class="col-5"><p>Date Updated</p></div>
-        //                   <div class="col-7"><p>--/--/--</p></div>
-        //                   <hr class="mx-3">
-        //                 </div>
-        //
-        // `;
-
-        marker.on('click', function(e) {
-
-          showDetails(e.target.options.type, e.target.options.index);
-          //alert(909);
-          //
-          // $('#details').html(details);
-          //
-          // sidebar.open('home');
-
-        });
-
-        subGroup['smr'].addLayer(marker);
-
-      }
-    }).complete(function() {
-
-      console.log("SMR loaded...")
-
-      layerControl.addOverlay(subGroup['smr'], 'NMS Sites and Monuments Record');
-
-      subGroup['smr'].addTo(map);
-
-    });
-
-
-
-
-    $.getJSON("getSites.php?lat=" + loc.lat + "&lng=" + loc.lng + "&table=niah&radius=" + rad, function(data) {
-
-      siteData['niah'] = data;
-      subGroup['niah'] = L.featureGroup.subGroup(sites);
-
-      for (var i = 0; i < data.length; i++) {
-
-        var name = data[i].NAME;
-
-        var location = new L.LatLng(data[i].lat, data[i].lng);
-
-        var id = data[i].index;
-        var lat = data[i].Lat;
-        var lng = data[i].lng;
-
-        var marker = new L.Marker(location, {
-          title: name,
-          // id : id,
-          lat: lat,
-          lng: lng,
-          icon: icons['niah'],
-          type: 'niah',
-          index: i //temp should be id not index
-        });
-
-        marker.on('click', function(e) {
-
-          showDetails(e.target.options.type, e.target.options.index);
-
-        });
-
-        subGroup['niah'].addLayer(marker);
-
-      }
-    }).complete(function() {
-
-      console.log("NIAH loaded...")
-      subGroup['niah'].addTo(map);
-      layerControl.addOverlay(subGroup['niah'], 'National Inventory of Architectural Heritage');
-    });
-
-
-    $.getJSON("getSites.php?lat=" + loc.lat + "&lng=" + loc.lng + "&table=wrecks&radius=" + rad, function(data) {
-
-      siteData['wreck'] = data;
-      subGroup['wrecks'] = L.featureGroup.subGroup(sites);
-
-
-      for (var i = 0; i < data.length; i++) {
-        //console.log(data[i].name);
-
-        var name = data[i].name;
-
-        var location = new L.LatLng(data[i].lat, data[i].lng);
-
-        var id = data[i].index;
-        var lat = data[i].Lat;
-        var lng = data[i].lng;
-
-        var marker = new L.Marker(location, {
-          title: name,
-          // id : id,
-          lat: lat,
-          lng: lng,
-          icon: icons['wreck'],
-          type: 'wreck',
-          index: i //temp should be id not index
-        });
-
-        marker.on('click', function(e) {
-
-          showDetails(e.target.options.type, e.target.options.index);
-
-        });
-
-        subGroup['wrecks'].addLayer(marker);
-
-      }
-    }).complete(function() {
-
-      console.log("wrecks loaded...")
-
-      layerControl.addOverlay(subGroup['wrecks'], 'NMS Wreck database');
-
-      subGroup['wrecks'].addTo(map);
-
-    });
-
-    //done loading data
-
-    // console.log(overlayMaps);
-    //
-    // L.control.layers(null, overlayMaps, {
-    //   collapsed: false
-    // }).addTo(map);
-    //
-    // layerControl.addBaseLayer(overlayMaps, 'My New BaseLayer');
-
-
-
-  }
-
-
-  function geoFind() {
-
-    console.log("doing geo find...");
-
-    const status = document.querySelector('#geo-status');
-
-
-    function success(position) {
-      const latitude = position.coords.latitude;
-      const longitude = position.coords.longitude;
-
-      status.textContent = '';
-
-      status.innerHTML += "<br>Found you...";
-      console.log("Found you...aa");
-
-
-      var loc = {
-        lat: parseFloat(position.coords.latitude),
-        lng: parseFloat(position.coords.longitude)
-      };
-
-      setLoc(loc, true);
-
-      MicroModal.close('location-modal');
-      //
-      // alert(loc);
-      initMap();
-
-
-
-      return true;
-
-
-    }
-
-    function error() {
-      status.innerHTML += "<br>Unable to retrieve your location...";
-      console.log("Unable to retrieve your location...");
-
-      status.innerHTML += "<br>Locating your IP...";
-
-      var pos = geoFindByIp();
-
-      var loc = {
-        lat: parseFloat(pos.lat),
-        lng: parseFloat(pos.lng)
-      };
-
-      setLoc(loc, true);
-
-      if (setLoc(pos)) {
-
-        if (getLoc()) {
-
-
-          status.innerHTML += "<br>Found you...";
-          console.log("Found you... b");
-
-
-          MicroModal.close('location-modal');
-          //
-          // alert(loc);
-          initMap();
-
-          return true;
-        } else {
-          return false;
-        }
-      };
-
-      return true;
-
-    }
-
-    if (!navigator.geolocation) {
-      status.innerHTML += "Geolocation is not supported by your browser...";
-      return false;
-    } else {
-      status.textContent = 'Locating…';
-      navigator.geolocation.getCurrentPosition(success, error);
-
-    }
-
-    //return loc;
-  }
-
-  function gerror(t) {
-
-    status.innerHTML += "<br>Unable to retrieve your location...";
-    console.log("Unable to retrieve your location...");
-
-    //var pos = L.GeoIP.getPosition();
-
-    status.innerHTML += "<br>Locating your IP...";
-
-    var pos = geoFindByIp();
-
-
-
-    var loc = {
-      lat: parseFloat(pos.lat),
-      lng: parseFloat(pos.lng)
-    };
-
-    setLoc(loc);
-
-    //MicroModal.close('location-modal');
-
-    return true;
-
-    // alert("xxx"+pos);
-    //
-    // if(setLoc(pos)){
-    //
-    //   if(getLoc()){
-    //
-    //
-    //       status.innerHTML += "<br>Found you...";
-    //       console.log("Found you... b");
-    //
-    //
-    //       MicroModal.close('location-modal');
-    //
-    //       return true;
-    //   }else{
-    //     return false;
-    //   }
-    // };
-
-    //return true;
-
-  }
-
-  function gsuccess() {
-    alert(9000);
-  }
-
-  function showDetails(type, index) {
-    //alert(siteData['niah'][index]);
-    //console.log(type);
-
-
-    switch (type) {
-      case 'niah':
-
-        var title = siteData[type][index].NAME;
-
-        var details = `
-
-  <img src="${siteData[type][index].IMAGE_LINK}" style="width:100%">
-
-  <table>
-  <tr>
-      <td>
-          Address:
-      </td>
-      <td>
-          <b>${siteData[type][index].STREET1},<br> ${siteData[type][index].TOWN},<br> ${siteData[type][index].COUNTY}</b>
-      </td>
-  </tr>
-  <tr>
-      <td>
-          Original Use:
-      </td>
-      <td>
-          <b>${siteData[type][index].ORIGINAL_TYPE}</b>
-      </td>
-  </tr>
-  <tr>
-      <td>
-          Date:
-      </td>
-      <td>
-          <b>${siteData[type][index].DATEFROM} - ${siteData[type][index].DATETO}</b>
-      </td>
-  </tr>
-  <tr>
-      <td>
-          Composition:
-      </td>
-      <td>
-          <b>${siteData[type][index].COMPOSITION}</b>
-      </td>
-  </tr>
-  <tr>
-      <td>
-          Distance:
-      </td>
-      <td>
-          <b>${Number(siteData[type][index].distance).toFixed(2)}km</b>
-      </td>
-  </tr>
-  <tr>
-      <td>
-          Link:
-      </td>
-      <td>
-          <b><a href="${siteData[type][index].WEBSITE_LINK}" target="_blank">Link<a></b>
-      </td>
-  </tr>
-
-
-  </table>
-
-  `;
-
-        break;
-
-      case ('smr'):
-
-        //check if webnotes have been loaded for site
-        if (!siteData[type][index].WEBNOTES) {
-
-          // fetch notes for site
-          $.getJSON("https://webservices.archaeology.ie/arcgis/rest/services/NM/NationalMonuments/MapServer/0/query?f=json&where=SMRS%20LIKE%20%27" + siteData[type][index].SMRS + "%27&outFields=WEBNOTES&returnGeometry=false", function(data) {
-
-            siteData[type][index].WEBNOTES = data.features[0]['attributes']['WEBNOTES'];
-
-            document.getElementById("webnotes").innerHTML = siteData[type][index].WEBNOTES;
-          });
-
-        }
-
-        var title = siteData[type][index].CLASSDESC;
-
-        var details = `
-
-    <table>
-
-    <img src="https://maps.googleapis.com/maps/api/staticmap?center=${siteData[type][index].lat},${siteData[type][index].lng}&zoom=18&size=400x300&&maptype=satellite&markers=color:red|anchor:center|${siteData[type][index].lat},${siteData[type][index].lng}&key=${gkey}"/>
-
-    <tr>
-        <td>
-            Class Description:
-        </td>
-        <td>
-            <b>${siteData[type][index].CLASSDESC}</b>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Townland:
-        </td>
-        <td>
-            <b>${siteData[type][index].TLAND_NAMES}</b>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            Notes:
-        </td>
-        <td>
-            <b id="webnotes">${siteData[type][index].WEBNOTES}</b>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            Distance:
-        </td>
-        <td>
-            <b>${Number(siteData[type][index].distance).toFixed(2)}km</b>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            Link:
-        </td>
-        <td>
-            <b><a href="${siteData[type][index].Link}" target="_blank">Link<a></b>
-        </td>
-    </tr>
-    </table>
-
-    `;
-
-        break;
-
-      case ('wreck'):
-
-        var title = siteData[type][index].name;
-
-        var details = `
-
-    <table>
-
-    <tr>
-        <td>
-            Name:
-        </td>
-        <td>
-            <b>${siteData[type][index].name}</b>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Classification:
-        </td>
-        <td>
-            <b>${siteData[type][index].Classification}</b>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            Place of Loss:
-        </td>
-        <td>
-            <b>${siteData[type][index].Place_of_Loss}</b>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            Date of Loss:
-        </td>
-        <td>
-            <b>${siteData[type][index].Date_of_Loss}</b>
-        </td>
-    </tr>
-
-    <tr>
-        <td>
-            Description:
-        </td>
-        <td>
-            <b>${siteData[type][index].Description}</b>
-        </td>
-    </tr>
-    <tr>
-        <td>
-            Distance:
-        </td>
-        <td>
-            <b>${Number(siteData[type][index].distance).toFixed(2)}km</b>
-        </td>
-    </tr>
-
-
-    </table>
-
-    `;
-
-        break;
-      default:
-
-    }
-
-    $('#title').html(title);
-
-    $('#details').html(details);
-
-    sidebar.open('profile');
-  }
-
-  function geoFindByIp(){
-
-    var url = "https://geolocation-db.com/json/"+gdbkey;
-
-    var result = L.latLng(0, 0);
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, false);
-    xhr.onload = function() {
-      var status = xhr.status;
-      if (status == 200) {
-        var geoip_response = JSON.parse(xhr.responseText);
-        result.lat = geoip_response.latitude;
-        result.lng = geoip_response.longitude;
-      } else {
-        console.log("geoFindByIP failed because its XMLHttpRequest got this response: " + xhr.status);
-      }
-    };
-    xhr.send();
-    return result;
-  }
-
-
-
-  function geoFindByIpx() {
-
-    console.log("doing geo find by IP...");
-
-    var url = "https://freegeoip.net/json/";
-
-    var url = "http://ip-api.com/json/";
-    var result = L.latLng(0, 0);
-
-    // if (ip !== undefined) {
-    //   url = url + ip;
-    // } else {
-    //   //lookup our own ip address
-    // }
-
-    var xhr = new XMLHttpRequest();
-    xhr.open("GET", url, false);
-    xhr.onload = function() {
-      var status = xhr.status;
-      if (status == 200) {
-        var geoip_response = JSON.parse(xhr.responseText);
-        result.lat = geoip_response.lat;
-        result.lng = geoip_response.lon;
-      } else {
-        console.log("Leaflet.GeoIP.getPosition failed because its XMLHttpRequest got this response: " + xhr.status);
-      }
-    };
-    xhr.send();
-    return result;
-  }
-
-
-  function setLoc(latLng, set_url = false) {
-
-    loc = latLng;
-
-    if (set_url) {
-      history.pushState(null, null, '/?lat=' + latLng.lat + '&lng=' + latLng.lng);
-    }
-
-    return loc;
-
-  }
-
-  function initLoc() {
-    console.log("init loc");
-
-
-    var url = new URL(document.URL);
-
-    // if lat && loc params are set
-    if (url.searchParams.has('lat') && url.searchParams.has('lng')) {
-      console.log("latLng set in url !")
-
-      //fix this
-
-      var lat = parseFloat(url.searchParams.get('lat'));
-      var lng = parseFloat(url.searchParams.get('lng'));
-
-      var loc = {
-        lat: parseFloat(url.searchParams.get('lat')),
-        lng: parseFloat(url.searchParams.get('lng'))
-      };
-
-
-      setLoc(loc);
-      initMap();
-
-      return true;
-
-    } else {
-      console.log("loc not set");
-
-      //set modal event  handlers
-      $("#geoFind").click(function() {
-        //alert("Handler for .click() called.");
-        //return geoFind();
-        geoFind();
-      });
-
-      // show geo modal
-      MicroModal.show('location-modal');
-
-
-    }
-
-    //return loc;
-  }
+  var coverageLayer;
+  var marker;
 
   return {
-    initMap: initMap,
-    getLoc: getLoc,
-    setLoc: setLoc,
-    initLoc: initLoc,
+    showLocationModal: false,
+    locationModalStatus: '',
+    radius: 5000,
+    //error: null,
+    sites: null,
+    map: null,
+    siteData: [],
+    subGroup: [],
+    loc: {
+      lat: null,
+      lng: null
+    },
+
+    poi: {
+      title: '',
+      details: 'Select a marker to view details.'
+    },
+
+    get_coords(dis, callback) {
+
+      //If HTML5 Geolocation Is Supported In This Browser
+      if (navigator.geolocation) {
+        //Use HTML5 Geolocation API To Get Current Position
+        // try high accuracy location for 5 seconds
+        navigator.geolocation.getCurrentPosition(function(position) {
+            //Get Latitude From Geolocation API
+            var lat = position.coords.latitude;
+            //Get Longitude From Geolocation API
+            var lng = position.coords.longitude;
+            window.console && console.log('coords : latitude=' + lat + ", longitude=" + lng);
+            callback(["coords", lat, lng]);
+          },
+          function(error) {
+
+            if (error.code == error.TIMEOUT) {
+              // Attempt to get GPS loc timed out after 5 seconds,
+              // try low accuracy location for 10 seconds
+              navigator.geolocation.getCurrentPosition(function(position) {
+                  //Get Latitude From Geolocation API
+                  var lat = position.coords.latitude;
+                  //Get Longitude From Geolocation API
+                  var lng = position.coords.longitude;
+                  window.console && console.log('coords : latitude=' + lat + ", longitude=" + lng);
+                  callback(dis, ["coords", lat, lng]);
+                },
+                function(error) {
+                  if (error.code == 1) {
+                    window.console && console.log('low accuracy geoloc_deactivated');
+                    callback(dis, ["geoloc_deactivated"]);
+                  } else if (error.code == 2) {
+                    window.console && console.log('low accuracy position_unavailable');
+                    callback(dis, ["position_unavailable"]);
+                  } else if (error.code == 3) {
+                    window.console && console.log("low accuracy timeout");
+                    callback(dis, ["timeout"]);
+                  }
+                }, {
+                  maximumAge: 600000,
+                  timeout: 10000,
+                  enableHighAccuracy: false
+                });
+            }
+            if (error.code == 1) {
+              window.console && console.log('high accuracy geoloc_deactivated');
+              callback(dis, ["geoloc_deactivated"]);
+            } else if (error.code == 2) {
+              window.console && console.log('high accuracy position_unavailable');
+
+              dis.locationModalStatus += "... high accuracy position_unavailable";
+
+              callback(dis, ["position_unavailable"]);
+
+            }
+
+          }, {
+            maximumAge: 600000,
+            timeout: 5000,
+            enableHighAccuracy: true
+          });
+      } else {
+        window.console && console.log("geoloc_not_supported");
+        callback(["geoloc_not_supported"]);
+      }
+    },
+
+    wash_your_hands() {
+      console.log("init");
+      this.initLoc();
+    },
+
+    getRadius() {
+      return this.radius;
+    },
+    setRadius(rad) {
+      radius = rad;
+      return radius;
+    },
+    setLoc(latLng, set_url = true) {
+
+      this.loc = latLng;
+
+      if (set_url) {
+        history.pushState(null, null, '/?lat=' + latLng.lat + '&lng=' + latLng.lng);
+      }
+
+      return this.loc;
+
+    },
+
+    geoFindBtn() {
+
+      console.log("doing geo find...");
+
+      cb = function(callback) {
+
+        if (Array.isArray(callback) && callback[0] == "coords") {
+
+          var loc = {
+            lat: callback[1],
+            lng: callback[2]
+          }
+          this.setLoc(loc);
+          this.showLocationModal = false
+          this.initMap()
+
+        } else {
+
+          var loc = this.geoFindByIp();
+
+          if (loc) {
+
+            this.setLoc(loc);
+
+            this.showLocationModal = false
+            this.initMap()
+
+          } else {
+
+            Swal.fire(
+              '',
+              'Could not set your location :(',
+              'error'
+            )
+
+          }
+
+        }
+
+      };
+
+      this.get_coords(this, cb.bind(this));
+
+    },
+
+    geoFindByIp() {
+
+      console.log("doing geo find by IP...");
+
+      var url = "https://geolocation-db.com/json/" + gdbkey;
+
+      var result = L.latLng(0, 0);
+
+      var xhr = new XMLHttpRequest();
+      xhr.open("GET", url, false);
+      xhr.onload = function() {
+        var status = xhr.status;
+        if (status == 200) {
+          var geoip_response = JSON.parse(xhr.responseText);
+          result.lat = geoip_response.latitude;
+          result.lng = geoip_response.longitude;
+        } else {
+          console.log("geoFindByIP failed because its XMLHttpRequest got this response: " + xhr.status);
+        }
+      };
+      xhr.send();
+      return result;
+    },
+
+    setLocGeoBtn() {
+
+      console.log("doing geo find...");
+
+      cb = function(callback) {
+
+        if (Array.isArray(callback) && callback[0] == "coords") {
+
+          var loc = {
+            lat: callback[1],
+            lng: callback[2]
+          }
+          this.setLoc(loc);
+          this.initMap()
+
+        } else {
+
+          Swal.fire(
+            '',
+            'Could not set your location by GPS :(',
+            'error'
+          )
+
+        }
+
+      };
+
+      this.get_coords(this, cb.bind(this));
+
+    },
+
+    setLocManualBtn() {
+
+      this.map.removeLayer(this.coverageLayer);
+      this.map.removeLayer(this.sites);
+
+      sidebar.close();
+
+      Swal.fire(
+        '',
+        'Click on the map to set your location'
+      )
+
+
+      this.map.on('click', this.setMarkerLocation.bind(this));
+
+    },
+
+    setMarkerLocation(e) {
+
+      this.setLoc(e.latlng);
+
+      this.map.off('click');
+
+      this.loadData();
+
+      this.coverageLayer.setData([
+        [this.loc.lat, this.loc.lng],
+      ]);
+
+      this.map.addLayer(this.coverageLayer);
+      this.map.addLayer(this.sites);
+
+    },
+
+
+    initLoc() {
+      console.log("init loc");
+
+      var url = new URL(document.URL);
+
+      // if lat && loc params are set
+      if (url.searchParams.has('lat') && url.searchParams.has('lng')) {
+        console.log("latLng set in url !")
+
+        this.loc.lat = parseFloat(url.searchParams.get('lat'));
+        this.loc.lng = parseFloat(url.searchParams.get('lng'));
+
+        this.initMap();
+
+        return true;
+
+      } else {
+        console.log("loc not set");
+
+        this.showLocationModal = true;
+
+      }
+
+    },
+
+    initMap() {
+
+      console.log('init map');
+
+      //============
+      // Base Layers
+
+      var osm = L.tileLayer('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">hotosm</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OSM Fr</a>'
+      });
+
+      this.coverageLayer = new L.GridLayer.MaskCanvas({
+        opacity: 1,
+        radius: this.radius,
+        useAbsoluteRadius: true,
+        color: '#90CCCB'
+      });
+      // todo ???
+      this.coverageLayer.setData([
+        [this.loc.lat, this.loc.lng],
+      ]);
+
+      // coverageLayer.setData(
+      //   [this.loc]
+      // );
+
+      this.map = new L.Map('map', {
+        //center: new L.LatLng(lat, lng),
+        center: this.loc,
+        //center: loc,
+        zoom: 13,
+        layers: [osm]
+      });
+
+      this.map.addLayer(this.coverageLayer);
+
+      // scale
+      L.control.scale({
+        'imperial': false
+      }).addTo(this.map);
+
+      // zoom control
+      // L.control
+      //   .zoom({
+      //     position: "topleft"
+      //   })
+      //   .addTo(map);
+
+      // market cluster group
+      this.sites = new L.MarkerClusterGroup({
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: true
+      });
+
+      sidebar = L.control.sidebar({
+        container: "sidebar",
+        position: "right"
+      });
+
+      sidebar.addTo(this.map);
+
+      layerControl = L.control.layers(null, null, {
+        collapsed: false
+      }).addTo(this.map);
+
+      icons['smr'] = new L.Icon({
+        iconUrl: '/img/leaflet/marker-icon-green.png',
+        shadowUrl: '/img/leaflet/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+      icons['niah'] = new L.Icon({
+        iconUrl: '/img/leaflet/marker-icon-red.png',
+        shadowUrl: '/img/leaflet/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+      icons['wreck'] = new L.Icon({
+        iconUrl: '/img/leaflet/marker-icon-yellow.png',
+        shadowUrl: '/img/leaflet/marker-shadow.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        shadowSize: [41, 41]
+      });
+
+
+      // add site layer to map
+      this.map.addLayer(this.sites);
+
+      // show sidebar
+      //sidebar.show(); // why no worky ?
+      // css hack
+      document.getElementById("sidebar").style.display = "block";
+
+      this.subGroup['smr'] = L.featureGroup.subGroup(this.sites);
+      this.subGroup['wrecks'] = L.featureGroup.subGroup(this.sites);
+      this.subGroup['niah'] = L.featureGroup.subGroup(this.sites);
+
+      layerControl.addOverlay(this.subGroup['smr'], 'NMS Sites and Monuments Record');
+      layerControl.addOverlay(this.subGroup['wrecks'], 'NMS Wreck database');
+      layerControl.addOverlay(this.subGroup['niah'], 'National Inventory of Architectural Heritage');
+
+      this.subGroup['smr'].addTo(this.map);
+      this.subGroup['wrecks'].addTo(this.map);
+      this.subGroup['niah'].addTo(this.map);
+
+      this.loadData();
+
+    },
+
+    shareTwitter() {
+
+      if (navigator.share) {
+        navigator.share({
+            title: 'Isolation Island',
+            text: 'Check out my Isolation Island map %23COVID19Ireland %232kmfromhome&related=tweetphelan', // todo related ?
+            url: window.location.href,
+          })
+          .then(() => console.log('Successful share'))
+          .catch((error) => console.log('Error sharing', error));
+      } else {
+        window.open("https://twitter.com/share?url=" + encodeURIComponent(window.location.href) + "&text=Check out my Isolation Island map %23COVID19Ireland %232kmfromhome&related=tweetphelan", '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');
+        return false;
+      }
+
+    },
+
+    loadData(reset = false) {
+
+      // reset data
+      this.siteData = [];
+
+      fetch(`getSites.php?lat=${this.loc.lat}&lng=${this.loc.lng}&table=smr&radius=${this.radius}`)
+        .then((res) => res.json())
+        .then((data) => {
+
+          this.subGroup['smr'].clearLayers();
+
+          this.siteData['smr'] = data;
+
+          for (var i = 0; i < data.length; i++) {
+
+            var name = data[i].CLASSDESC;
+
+            var location = new L.LatLng(data[i].lat, data[i].lng);
+
+            var id = data[i].index;
+            var lat = data[i].Lat;
+            var lng = data[i].lng;
+
+            var marker = new L.Marker(location, {
+              title: name,
+              // id : id,
+              lat: lat,
+              lng: lng,
+              icon: icons['smr'],
+              type: 'smr',
+              index: i
+            });
+
+            marker.on('click', this.markerClick.bind(this));
+
+            this.subGroup['smr'].addLayer(marker);
+
+          }
+
+          console.log("SMR loaded...")
+
+        });
+
+      fetch(`getSites.php?lat=${this.loc.lat}&lng=${this.loc.lng}&table=niah&radius=${this.radius}`)
+        .then((res) => res.json())
+        .then((data) => {
+
+          this.subGroup['niah'].clearLayers();
+          this.siteData['niah'] = data;
+
+          for (var i = 0; i < data.length; i++) {
+
+            var name = data[i].NAME;
+
+            var location = new L.LatLng(data[i].lat, data[i].lng);
+
+            var id = data[i].index;
+            var lat = data[i].Lat;
+            var lng = data[i].lng;
+
+            var marker = new L.Marker(location, {
+              title: name,
+              // id : id,
+              lat: lat,
+              lng: lng,
+              icon: icons['niah'],
+              type: 'niah',
+              index: i //temp should be id not index
+            });
+
+            marker.on('click', this.markerClick.bind(this));
+
+            this.subGroup['niah'].addLayer(marker);
+
+          }
+
+          console.log("NIAH loaded...")
+
+        });
+
+      fetch(`getSites.php?lat=${this.loc.lat}&lng=${this.loc.lng}&table=wrecks&radius=${this.radius}`)
+        .then((res) => res.json())
+        .then((data) => {
+
+          this.subGroup['wrecks'].clearLayers();
+          this.siteData['wrecks'] = data;
+
+          for (var i = 0; i < data.length; i++) {
+
+            var name = data[i].name;
+
+            var location = new L.LatLng(data[i].lat, data[i].lng);
+
+            var id = data[i].index;
+            var lat = data[i].Lat;
+            var lng = data[i].lng;
+
+            var marker = new L.Marker(location, {
+              title: name,
+              // id : id,
+              lat: lat,
+              lng: lng,
+              icon: icons['wreck'],
+              type: 'wrecks',
+              index: i //temp should be id not index
+            });
+
+            marker.on('click', this.markerClick.bind(this));
+
+
+            this.subGroup['wrecks'].addLayer(marker);
+
+          }
+
+          console.log("wrecks loaded...")
+
+        });
+    },
+
+    markerClick(e) {
+      this.showDetails(e.target.options.type, e.target.options.index);
+    },
+
+    showDetails(type, index) {
+
+      switch (type) {
+        case 'niah':
+
+          var title = this.siteData[type][index].NAME;
+
+          var details = `
+          <img src="${this.siteData[type][index].IMAGE_LINK}" style="width:100%">
+          <table>
+            <tr>
+              <td>
+                Address:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].STREET1},<br> ${this.siteData[type][index].TOWN},<br> ${this.siteData[type][index].COUNTY}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Original Use:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].ORIGINAL_TYPE}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Date:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].DATEFROM} - ${this.siteData[type][index].DATETO}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Composition:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].COMPOSITION}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Distance:
+              </td>
+              <td>
+                <b>${Number(this.siteData[type][index].distance).toFixed(2)}km</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Link:
+              </td>
+              <td>
+                <b><a href="${this.siteData[type][index].WEBSITE_LINK}" target="_blank">Link<a></b>
+              </td>
+            </tr>
+          </table>
+    `;
+
+          break;
+
+        case ('smr'):
+
+          //check if webnotes have been loaded for site
+          if (!this.siteData[type][index].WEBNOTES) {
+
+            fetch(`https://webservices.archaeology.ie/arcgis/rest/services/NM/NationalMonuments/MapServer/0/query?f=json&where=SMRS%20LIKE%20%27${this.siteData[type][index].SMRS}%27&outFields=WEBNOTES&returnGeometry=false`)
+              .then((res) => res.json())
+              .then((data) => {
+
+                this.siteData[type][index].WEBNOTES = data.features[0]['attributes']['WEBNOTES']
+
+              });
+
+          }
+
+          var title = this.siteData[type][index].CLASSDESC;
+
+          var details = `
+          <table>
+            <img src="https://maps.googleapis.com/maps/api/staticmap?center=${this.siteData[type][index].lat},${this.siteData[type][index].lng}&zoom=18&size=400x300&&maptype=satellite&markers=color:red|anchor:center|${this.siteData[type][index].lat},${this.siteData[type][index].lng}&key=${gkey}" />
+            <tr>
+              <td>
+                Class Description:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].CLASSDESC}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Townland:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].TLAND_NAMES}</b>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Notes:
+              </td>
+              <td>
+                <b id="webnotes" x-text="siteData['${type}'][${index}].WEBNOTES"></b>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Distance:
+              </td>
+              <td>
+                <b>${Number(this.siteData[type][index].distance).toFixed(2)}km</b>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Link:
+              </td>
+              <td>
+                <b><a href="${this.siteData[type][index].Link}" target="_blank">Link<a></b>
+              </td>
+            </tr>
+          </table>`;
+
+          break;
+
+        case ('wrecks'):
+
+          var title = this.siteData[type][index].name;
+
+          var details = `
+          <table>
+            <tr>
+              <td>
+                Name:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].name}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Classification:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].Classification}</b>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Place of Loss:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].Place_of_Loss}</b>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Date of Loss:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].Date_of_Loss}</b>
+              </td>
+            </tr>
+
+            <tr>
+              <td>
+                Description:
+              </td>
+              <td>
+                <b>${this.siteData[type][index].Description}</b>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                Distance:
+              </td>
+              <td>
+                <b>${Number(this.siteData[type][index].distance).toFixed(2)}km</b>
+              </td>
+            </tr>
+          </table>`;
+
+          break;
+        default:
+
+      }
+
+      this.poi.title = title;
+
+      this.poi.details = details;
+
+      sidebar.open('profile');
+    }
+
   }
-})();
 
-
-
-$(document).ready(function() {
-
-  MicroModal.init();
-
-  app.initLoc();
-
-  // move
-  $("#tw_share").click(function() {
-    window.open("https://twitter.com/share?url="+ encodeURIComponent(window.location.href)+"&text=Check out my Isolation Island map %23COVID19Ireland %235kmfromhome&related=tweetphelan", '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;
-  });
-
-
-});
+}

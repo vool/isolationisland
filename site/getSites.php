@@ -11,15 +11,10 @@ if(!(isset($_GET['lat']) && isset($_GET['lng']))){
 
 $radius = (isset($_GET['radius']) ? $_GET['radius'] : $default_radius)/1000;
 
-
 $lat = mysqli_real_escape_string($db, $_GET['lat']);
 $lng = mysqli_real_escape_string($db, $_GET['lng']);
 $table = mysqli_real_escape_string($db, $_GET['table']);
 $radius = mysqli_real_escape_string($db, $radius);
-
-//$table ='sites';
-//$table ='niah';
-//$table ='smr';
 
 $query = "
 SELECT * FROM (
@@ -39,8 +34,6 @@ SELECT * FROM (
         as distance FROM `$table`
     ) $table
     WHERE distance <= $radius";
-// echo $query;
-//     exit;
 
 $result = $db->query($query);
 if (!$result) {
@@ -48,11 +41,8 @@ if (!$result) {
     exit;
 }
 
-//echo $query ;
-
 $shrines = array();
 while($row = $result->fetch_assoc()) {
-  //var_dump($row);
     $shrines[] = $row;
 }
 
